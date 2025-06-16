@@ -1,0 +1,44 @@
+name: Publish to Test PyPI
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  test-pypi-publish:
+    name: Publish Python Package to Test PyPI
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Run tests
+        run: uv run pytest tests/unit
+
+      - name: Get latest version from Test PyPI and increment
+        id: version
+        run: |
+          # Install requests for API calls
+          uv add --dev requests
+          
+          # Run the version update script
+          NEW_VERSION=$(uv run python .github/scripts/update_version.py | grep "NEW_VERSION=" | cut -d'=' -f2)
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build package
+        run: uv build
+
+      - name: Publish to Test PyPI
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        run: uv publish --publish-url https://test.pypi.org/legacy/ 

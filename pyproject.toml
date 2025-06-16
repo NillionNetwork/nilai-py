@@ -1,6 +1,6 @@
 [project]
 name = "nilai-py"
-version = "0.1.0"
+version = "0.0.0a0"
 description = "Nilai Python SDK"
 readme = "README.md"
 authors = [
