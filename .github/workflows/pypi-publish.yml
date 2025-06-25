@@ -49,20 +49,6 @@ jobs:
       - name: Build package
         run: uv build
 
-      - name: Check package contents
-        run: |
-          # List the built packages
-          ls -la dist/
-          
-          # Check package metadata
-          uv run python -c "
-          import pkg_resources
-          import os
-          for file in os.listdir('dist'):
-              if file.endswith('.whl'):
-                  print(f'Package: {file}')
-          "
-
       - name: Publish to PyPI
         env:
           UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
