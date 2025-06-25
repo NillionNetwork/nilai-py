@@ -15,7 +15,7 @@ from . import API_KEY
 
 def test_e2e_api_key():
     client = Client(
-        base_url="https://testnet-p0.nilai.sandbox.nilogy.xyz/nuc/v1/",
+        base_url="https://nilai-a779.nillion.network/nuc/v1/",
         api_key=API_KEY,
     )
     response = client.chat.completions.create(

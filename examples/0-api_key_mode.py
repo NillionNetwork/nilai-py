@@ -10,7 +10,7 @@ def main():
     # The API key will be displayed in the subscription details.
     # The Client class automatically handles the NUC token creation and management.
     client = Client(
-        base_url="https://testnet-p0.nilai.sandbox.nilogy.xyz/nuc/v1/",
+        base_url="https://nilai-a779.nillion.network/nuc/v1/",
         api_key=API_KEY,
     )
 
