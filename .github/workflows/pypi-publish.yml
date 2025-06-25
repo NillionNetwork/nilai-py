@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     
     # Only run on published releases (not drafts or pre-releases)
-    if: github.event.release.prerelease == false && github.event.release.draft == false
+    if: github.event.release.draft == false
     
     steps:
       - uses: actions/checkout@v4
