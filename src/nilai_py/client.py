@@ -41,7 +41,11 @@ class Client(openai.Client):
         super().__init__(*args, **kwargs)
 
         # Retrieve the public key from the nilai server
-        self.nilai_public_key = self._get_nilai_public_key()
+        try:
+            self.nilai_public_key = self._get_nilai_public_key()
+        except Exception as e:
+            print(f"Failed to retrieve the nilai public key: {e}")
+            raise e
 
     def _api_key_init(self, *args, **kwargs):
         # Initialize the nilauth private key with the subscription
@@ -94,7 +98,11 @@ class Client(openai.Client):
             RuntimeError: If the nilai public key cannot be retrieved.
         """
         try:
-            public_key_response = httpx.get(f"{self.base_url}/public_key")
+            public_key_response = httpx.get(f"{self.base_url}public_key", verify=False)
+            if public_key_response.status_code != 200:
+                raise RuntimeError(
+                    f"Failed to retrieve the nilai public key: {public_key_response.text}"
+                )
             return NilAuthPublicKey(
                 base64.b64decode(public_key_response.text), raw=True
             )

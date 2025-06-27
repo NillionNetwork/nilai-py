@@ -6,7 +6,7 @@ from secp256k1 import PrivateKey as NilAuthPrivateKey, PublicKey as NilAuthPubli
 
 class NilAuthInstance(enum.Enum):
     SANDBOX = "https://nilauth.sandbox.app-cluster.sandbox.nilogy.xyz"
-    PRODUCTION = "https://nilauth.nillion.network"
+    PRODUCTION = "https://nilauth-cf7f.nillion.network/"
 
 
 class AuthType(enum.Enum):

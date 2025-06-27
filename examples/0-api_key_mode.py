@@ -1,4 +1,4 @@
-from nilai_py import Client
+from nilai_py import Client, NilAuthInstance
 
 from config import API_KEY
 
@@ -9,9 +9,12 @@ def main():
     # and create a new subscription.
     # The API key will be displayed in the subscription details.
     # The Client class automatically handles the NUC token creation and management.
+    ## For sandbox, use the following:
     client = Client(
         base_url="https://nilai-a779.nillion.network/nuc/v1/",
         api_key=API_KEY,
+        # For production, use the following:
+        # nilauth_instance=NilAuthInstance.PRODUCTION,
     )
 
     # Make a request to the Nilai API

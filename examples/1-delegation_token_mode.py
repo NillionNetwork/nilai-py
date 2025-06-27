@@ -5,6 +5,7 @@ from nilai_py import (
     DelegationServerConfig,
     DelegationTokenRequest,
     DelegationTokenResponse,
+    NilAuthInstance,
 )
 
 from config import API_KEY
@@ -20,6 +21,8 @@ def main():
             expiration_time=10,  # 10 seconds validity of delegation tokens
             token_max_uses=1,  # 1 use of a delegation token
         ),
+        # For production instances, use the following:
+        # nilauth_instance=NilAuthInstance.PRODUCTION,
     )
 
     # >>> Client initializes a client
@@ -28,6 +31,8 @@ def main():
     client = Client(
         base_url="https://nilai-a779.nillion.network/nuc/v1/",
         auth_type=AuthType.DELEGATION_TOKEN,
+        # For production instances, use the following:
+        # nilauth_instance=NilAuthInstance.PRODUCTION,
     )
 
     # >>> Client produces a delegation request

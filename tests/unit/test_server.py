@@ -330,7 +330,6 @@ class TestDelegationTokenServer:
         )
 
         assert server.nilauth_instance == NilAuthInstance.PRODUCTION
-        assert server.nilauth_instance.value == "https://nilauth.nillion.network"
 
     @patch("nilai_py.server.datetime")
     def test_expiration_time_calculation(
