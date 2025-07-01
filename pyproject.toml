@@ -9,7 +9,7 @@ authors = [
 requires-python = ">=3.10"
 dependencies = [
     "httpx>=0.28.1",
-    "nuc==0.1.0rc3",
+    "nuc>=0.1.0",
     "openai>=1.93.0",
     "pydantic>=2.11.7",
     "python-dotenv>=1.1.1",
