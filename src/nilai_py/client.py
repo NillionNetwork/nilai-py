@@ -182,4 +182,5 @@ class Client(openai.Client):
     @override
     def auth_headers(self) -> dict[str, str]:
         api_key = self._get_invocation_token()
+        print("api_key", api_key)
         return {"Authorization": f"Bearer {api_key}"}

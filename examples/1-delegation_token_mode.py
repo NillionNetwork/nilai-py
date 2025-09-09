@@ -15,10 +15,11 @@ def main():
     # >>> Server initializes a delegation token server
     # The server is responsible for creating delegation tokens
     # and managing their expiration and usage.
+    print("API_KEY", API_KEY)
     server = DelegationTokenServer(
         private_key=API_KEY,
         config=DelegationServerConfig(
-            expiration_time=10,  # 10 seconds validity of delegation tokens
+            expiration_time=10 * 60 * 60,  # 10 seconds validity of delegation tokens
             token_max_uses=1,  # 1 use of a delegation token
         ),
         # For production instances, use the following:
@@ -34,27 +35,28 @@ def main():
         # For production instances, use the following:
         # nilauth_instance=NilAuthInstance.PRODUCTION,
     )
+    for i in range(100):
+        # >>> Client produces a delegation request
+        delegation_request: DelegationTokenRequest = client.get_delegation_request()
 
-    # >>> Client produces a delegation request
-    delegation_request: DelegationTokenRequest = client.get_delegation_request()
+        # <<< Server creates a delegation token
+        delegation_token: DelegationTokenResponse = server.create_delegation_token(
+            delegation_request
+        )
 
-    # <<< Server creates a delegation token
-    delegation_token: DelegationTokenResponse = server.create_delegation_token(
-        delegation_request
-    )
+        # >>> Client sets internally the delegation token
+        client.update_delegation(delegation_token)
 
-    # >>> Client sets internally the delegation token
-    client.update_delegation(delegation_token)
 
-    # >>> Client uses the delegation token to make a request
-    response = client.chat.completions.create(
-        model="meta-llama/Llama-3.2-3B-Instruct",
-        messages=[
-            {"role": "user", "content": "Hello! Can you help me with something?"}
-        ],
-    )
+        # >>> Client uses the delegation token to make a request
+        response = client.chat.completions.create(
+            model="meta-llama/Llama-3.2-3B-Instruct",
+            messages=[
+                {"role": "user", "content": "Hello! Can you help me with something?"}
+            ],
+        )
 
-    print(f"Response: {response.choices[0].message.content}")
+        print(f"Response {i}: {response.choices[0].message.content}")
 
 
 if __name__ == "__main__":
