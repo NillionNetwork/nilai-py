@@ -1,4 +1,4 @@
-from nilai_py import Client, NilAuthInstance
+from nilai_py import Client
 
 from config import API_KEY
 
@@ -21,7 +21,10 @@ def main():
     response = client.chat.completions.create(
         model="google/gemma-3-27b-it",
         messages=[
-            {"role": "user", "content": "Create a story written as if you were a pirate. Write in a pirate accent."}
+            {
+                "role": "user",
+                "content": "Create a story written as if you were a pirate. Write in a pirate accent.",
+            }
         ],
     )
 

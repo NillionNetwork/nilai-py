@@ -173,3 +173,6 @@ prometheus/data/*
 
 private_key.key
 private_key.key.lock
+
+keys/*
+stored_prompts/*

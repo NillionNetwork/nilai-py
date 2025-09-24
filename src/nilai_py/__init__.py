@@ -6,6 +6,8 @@ from nilai_py.niltypes import (
     AuthType,
     NilAuthInstance,
     DelegationServerConfig,
+    PromptDocumentInfo,
+    DelegationTokenServerType,
 )
 
 __all__ = [
@@ -16,4 +18,6 @@ __all__ = [
     "AuthType",
     "NilAuthInstance",
     "DelegationServerConfig",
+    "PromptDocumentInfo",
+    "DelegationTokenServerType",
 ]

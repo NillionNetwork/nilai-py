@@ -14,10 +14,22 @@ class AuthType(enum.Enum):
     DELEGATION_TOKEN = "DELEGATION_TOKEN"
 
 
+class DelegationTokenServerType(enum.Enum):
+    SUBSCRIPTION_OWNER = "SUBSCRIPTION_OWNER"
+    DELEGATION_ISSUER = "DELEGATION_ISSUER"
+
+
+class PromptDocumentInfo(BaseModel):
+    doc_id: str
+    owner_did: str
+
+
 class DelegationServerConfig(BaseModel):
+    mode: DelegationTokenServerType = DelegationTokenServerType.SUBSCRIPTION_OWNER
     nilauth_url: str = NilAuthInstance.SANDBOX.value
     expiration_time: Optional[int] = 60
     token_max_uses: Optional[int] = 1
+    prompt_document: Optional[PromptDocumentInfo] = None
 
 
 class RequestType(enum.Enum):
@@ -45,6 +57,7 @@ __all__ = [
     "NilAuthPrivateKey",
     "NilAuthPublicKey",
     "NilAuthInstance",
+    "PromptDocumentInfo",
     "AuthType",
     "DelegationTokenRequest",
     "DelegationTokenResponse",

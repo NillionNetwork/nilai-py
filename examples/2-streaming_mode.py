@@ -1,4 +1,4 @@
-from nilai_py import Client, NilAuthInstance
+from nilai_py import Client
 
 from config import API_KEY
 
@@ -20,11 +20,14 @@ def main():
     # Make a streaming request to the Nilai API
     print("Starting streaming response...")
     print("=" * 50)
-    
+
     stream = client.chat.completions.create(
         model="google/gemma-3-27b-it",
         messages=[
-            {"role": "user", "content": "Write a short story about a robot learning to paint. Make it creative and engaging."}
+            {
+                "role": "user",
+                "content": "Write a short story about a robot learning to paint. Make it creative and engaging.",
+            }
         ],
         stream=True,  # Enable streaming
     )
@@ -32,13 +35,21 @@ def main():
     # Process the streaming response
     full_response = ""
     for chunk in stream:
-        if chunk.choices is not None and len(chunk.choices) > 0 and chunk.choices[0].delta.content is not None:
+        if (
+            chunk.choices is not None
+            and len(chunk.choices) > 0
+            and chunk.choices[0].delta.content is not None
+        ):
             content = chunk.choices[0].delta.content
-            print(content, end="", flush=True)  # Print without newline and flush immediately
+            print(
+                content, end="", flush=True
+            )  # Print without newline and flush immediately
             full_response += content
 
     print("\n" + "=" * 50)
-    print(f"\nStreaming completed. Full response length: {len(full_response)} characters")
+    print(
+        f"\nStreaming completed. Full response length: {len(full_response)} characters"
+    )
 
 
 if __name__ == "__main__":

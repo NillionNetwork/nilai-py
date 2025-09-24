@@ -1,14 +1,21 @@
+import json
+import os
 import openai
 from typing_extensions import override
+from typing import List
 
 
 import base64
 import httpx
+import asyncio
+import datetime
+
 
 from nuc.envelope import NucTokenEnvelope
 from nuc.token import Did, InvocationBody
 from nuc.builder import NucTokenBuilder
 from nuc.nilauth import NilauthClient, BlindModule
+from nilai_py.nildb import NilDBPromptManager
 
 from nilai_py.niltypes import (
     DelegationTokenRequest,
@@ -43,6 +50,9 @@ class Client(openai.Client):
         # Retrieve the public key from the nilai server
         try:
             self.nilai_public_key = self._get_nilai_public_key()
+            print(
+                "Retrieved nilai public key:", self.nilai_public_key.serialize().hex()
+            )
         except Exception as e:
             print(f"Failed to retrieve the nilai public key: {e}")
             raise e
@@ -85,6 +95,8 @@ class Client(openai.Client):
                 self.nilauth_private_key, blind_module=BlindModule.NILAI
             )
             self._root_token_envelope = NucTokenEnvelope.parse(root_token_response)
+
+        print("Root token envelope:", self._root_token_envelope.token.token)
         return self._root_token_envelope
 
     def _get_nilai_public_key(self) -> NilAuthPublicKey:
@@ -182,5 +194,45 @@ class Client(openai.Client):
     @override
     def auth_headers(self) -> dict[str, str]:
         api_key = self._get_invocation_token()
-        print("api_key", api_key)
         return {"Authorization": f"Bearer {api_key}"}
+
+    async def async_list_prompts_from_nildb(self) -> None:
+        prompt_manager = await NilDBPromptManager.init(nilai_url=self.base_url)
+        await prompt_manager.list_prompts()
+        await prompt_manager.close()
+
+    def list_prompts_from_nildb(self) -> None:
+        return asyncio.run(self.async_list_prompts_from_nildb())
+
+    async def async_store_prompt_to_nildb(self, prompt: str, dir: str) -> List[str]:
+        prompt_manager = await NilDBPromptManager.init(nilai_url=self.base_url)
+
+        invocation_token = self._get_invocation_token()
+        result = await prompt_manager.create_prompt(
+            prompt=prompt, nilai_invocation_token=invocation_token
+        )
+
+        await prompt_manager.close()
+
+        # Extract document IDs from the result for storage
+        document_ids = []
+        if result and hasattr(result, "root"):
+            for node_name, response in result.root.items():
+                if hasattr(response, "data") and hasattr(response.data, "created"):
+                    document_ids.extend(response.data.created)
+
+        # Store the created document IDs to a json file
+        os.makedirs(dir, exist_ok=True)
+        storage_data = {
+            "prompt": prompt,
+            "created_at": datetime.datetime.now().isoformat(),
+            "did": prompt_manager.user_result.keypair.to_did_string(),
+            "document_ids": document_ids,
+        }
+        with open(f"{dir}/stored_prompts-{document_ids[0]}.json", "w+") as f:
+            json.dump(storage_data, f, indent=4)
+
+        return document_ids
+
+    def store_prompt_to_nildb(self, prompt: str, dir="./stored_prompts") -> List[str]:
+        return asyncio.run(self.async_store_prompt_to_nildb(prompt, dir=dir))
