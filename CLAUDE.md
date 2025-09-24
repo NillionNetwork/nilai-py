@@ -45,6 +45,10 @@ python examples/0-api_key_mode.py
 python examples/1-delegation_token_mode.py
 python examples/2-streaming_mode.py
 python examples/3-advanced_streaming.py
+python examples/4-concurrent-streaming.py
+python examples/5-nildb-prompt-storage.py
+python examples/6-nildb-stored-prompt.py
+python examples/7-web-search.py
 ```
 
 ## Architecture
@@ -103,3 +107,69 @@ python examples/3-advanced_streaming.py
 - `tests/unit/`: Unit tests for individual components
 - `tests/e2e/`: End-to-end integration tests
 - Test coverage focused on DelegationTokenServer (100% coverage) and core functionality
+
+### Examples Structure
+
+The examples directory demonstrates various SDK capabilities:
+
+- `examples/0-api_key_mode.py`: Basic API key authentication
+- `examples/1-delegation_token_mode.py`: Delegation token flow
+- `examples/2-streaming_mode.py`: Basic streaming responses
+- `examples/3-advanced_streaming.py`: Advanced streaming with error handling
+- `examples/4-concurrent-streaming.py`: Multiple concurrent streaming requests
+- `examples/5-nildb-prompt-storage.py`: Storing prompts in NilDB with delegation
+- `examples/6-nildb-stored-prompt.py`: Using stored prompts with complex delegation chains
+- `examples/7-web-search.py`: Web search capabilities
+
+### NilDB Integration
+
+The SDK includes a complete document management system (`src/nilai_py/nildb/`) for handling prompts:
+
+- **Document Operations**: Create, list, and manage prompt documents
+- **User Management**: Automatic user setup with SecretVaults integration
+- **Delegation Chain**: Complex delegation token flows for document access
+- **Key Components**:
+  - `NilDBPromptManager`: Main interface for document operations
+  - `UserSetupResult`: User configuration and key management
+  - `DocumentReference`: Document metadata and access control
+
+### Streaming Support
+
+Both authentication modes support real-time streaming responses with:
+- Real-time chunk processing
+- Progress tracking and monitoring
+- Error handling and retry logic
+- Concurrent streaming capabilities
+
+## Development Patterns
+
+### File Structure Conventions
+- Core functionality in `src/nilai_py/`: Client, server, and type definitions
+- NilDB subsystem in `src/nilai_py/nildb/`: Document management and user operations
+- Examples in `examples/`: Numbered examples with specific use cases
+- Tests split between `tests/unit/` and `tests/e2e/`
+
+### Authentication Architecture
+The SDK uses a two-tier authentication system:
+1. **Root Tokens**: Long-lived server credentials (API key or private key)
+2. **Delegation/Invocation Tokens**: Short-lived request tokens
+
+**Token Flow**:
+- Server creates root token using NilAuth
+- Root token generates delegation tokens with configurable expiration/usage limits
+- Client uses delegation tokens to create invocation tokens for each API request
+- All tokens automatically refresh when expired
+
+### NilDB Document Flow
+Complex delegation chains for document access:
+1. **Subscription Owner Server**: Controls API access using API key
+2. **Prompt Data Owner Server**: Controls document access using private key
+3. **Client**: Makes requests using chained delegation tokens
+
+This enables fine-grained access control where document owners can delegate access independently of API subscription owners.
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
