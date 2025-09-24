@@ -96,7 +96,6 @@ class Client(openai.Client):
             )
             self._root_token_envelope = NucTokenEnvelope.parse(root_token_response)
 
-        print("Root token envelope:", self._root_token_envelope.token.token)
         return self._root_token_envelope
 
     def _get_nilai_public_key(self) -> NilAuthPublicKey:
