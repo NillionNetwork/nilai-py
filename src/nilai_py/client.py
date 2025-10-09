@@ -14,26 +14,21 @@ import datetime
 from nuc.envelope import NucTokenEnvelope
 from nuc.token import Did, InvocationBody
 from nuc.builder import NucTokenBuilder
-from nuc.nilauth import NilauthClient, BlindModule
 from nilai_py.nildb import NilDBPromptManager
 
 from nilai_py.niltypes import (
     DelegationTokenRequest,
     NilAuthPrivateKey,
     NilAuthPublicKey,
-    NilAuthInstance,
     AuthType,
 )
 
-from nilai_py.common import is_expired
+from nilai_py.common import is_expired, new_root_token
 
 
 class Client(openai.Client):
     def __init__(self, *args, **kwargs):
         self.auth_type: AuthType = kwargs.pop("auth_type", AuthType.API_KEY)
-        self.nilauth_instance: NilAuthInstance = kwargs.pop(
-            "nilauth_instance", NilAuthInstance.SANDBOX
-        )
 
         match self.auth_type:
             case AuthType.API_KEY:
@@ -66,17 +61,13 @@ class Client(openai.Client):
         self.nilauth_private_key: NilAuthPrivateKey = NilAuthPrivateKey(
             bytes.fromhex(self.api_key)
         )
-        # Retrieve the nilauth url from the kwargs
-        self.nilauth_url: NilAuthInstance = kwargs.pop(
-            "nilauth_url", NilAuthInstance.SANDBOX
-        )
         # Initialize the root token envelope
         self._root_token_envelope: NucTokenEnvelope = None
 
     def _delegation_token_init(self, *args, **kwargs):
         # Generate a new private key for the client
         self.nilauth_private_key: NilAuthPrivateKey = NilAuthPrivateKey()
-
+    
     @property
     def root_token(self) -> NucTokenEnvelope:
         """
@@ -88,13 +79,9 @@ class Client(openai.Client):
         """
         if self.auth_type != AuthType.API_KEY:
             raise RuntimeError("Root token is only available in API key mode")
-
+        
         if self._root_token_envelope is None or is_expired(self._root_token_envelope):
-            nilauth_client = NilauthClient(self.nilauth_instance.value)
-            root_token_response = nilauth_client.request_token(
-                self.nilauth_private_key, blind_module=BlindModule.NILAI
-            )
-            self._root_token_envelope = NucTokenEnvelope.parse(root_token_response)
+            self._root_token_envelope = new_root_token(self.nilauth_private_key)
 
         return self._root_token_envelope
 

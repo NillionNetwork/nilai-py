@@ -5,15 +5,13 @@ from nilai_py.niltypes import (
     DelegationServerConfig,
     DefaultDelegationTokenServerConfig,
     DelegationTokenServerType,
-    NilAuthInstance,
     NilAuthPrivateKey,
 )
 
-from nilai_py.common import is_expired
+from nilai_py.common import is_expired, new_root_token
 from nuc.envelope import NucTokenEnvelope
 from nuc.token import Did
 from nuc.builder import NucTokenBuilder, Command
-from nuc.nilauth import NilauthClient, BlindModule
 import datetime
 
 
@@ -21,22 +19,19 @@ class DelegationTokenServer:
     def __init__(
         self,
         private_key: str,
-        config: DelegationServerConfig = DefaultDelegationTokenServerConfig,
-        nilauth_instance: NilAuthInstance = NilAuthInstance.SANDBOX,
-    ):
+        config: DelegationServerConfig = DefaultDelegationTokenServerConfig
+        ):
         """
         Initialize the delegation token server.
 
         Args:
             private_key (str): The private key of the server.
             config (DelegationServerConfig): The configuration for the server.
-            nilauth_instance (NilAuthInstance): The nilauth instance to use.
         """
         self.config: DelegationServerConfig = config
         self.private_key: NilAuthPrivateKey = NilAuthPrivateKey(
             bytes.fromhex(private_key)
         )
-        self.nilauth_instance: NilAuthInstance = nilauth_instance
         self._root_token_envelope: NucTokenEnvelope = None
 
     @property
@@ -53,11 +48,7 @@ class DelegationTokenServer:
                 raise ValueError(
                     "In DELEGATION_ISSUER mode, the root token cannot be refreshed, it must be provided"
                 )
-            nilauth_client = NilauthClient(self.nilauth_instance.value)
-            root_token_response = nilauth_client.request_token(
-                self.private_key, blind_module=BlindModule.NILAI
-            )
-            self._root_token_envelope = NucTokenEnvelope.parse(root_token_response)
+            self._root_token_envelope = new_root_token(self.private_key)
         return self._root_token_envelope
 
     def update_delegation_token(self, root_token: str):

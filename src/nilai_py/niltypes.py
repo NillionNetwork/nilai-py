@@ -4,10 +4,6 @@ from pydantic import BaseModel
 from secp256k1 import PrivateKey as NilAuthPrivateKey, PublicKey as NilAuthPublicKey
 
 
-class NilAuthInstance(enum.Enum):
-    SANDBOX = "https://nilauth.sandbox.app-cluster.sandbox.nilogy.xyz"
-    PRODUCTION = "https://nilauth-cf7f.nillion.network/"
-
 
 class AuthType(enum.Enum):
     API_KEY = "API_KEY"
@@ -26,7 +22,6 @@ class PromptDocumentInfo(BaseModel):
 
 class DelegationServerConfig(BaseModel):
     mode: DelegationTokenServerType = DelegationTokenServerType.SUBSCRIPTION_OWNER
-    nilauth_url: str = NilAuthInstance.SANDBOX.value
     expiration_time: Optional[int] = 60
     token_max_uses: Optional[int] = 1
     prompt_document: Optional[PromptDocumentInfo] = None
@@ -48,7 +43,6 @@ class DelegationTokenResponse(BaseModel):
 
 
 DefaultDelegationTokenServerConfig = DelegationServerConfig(
-    nilauth_url=NilAuthInstance.SANDBOX.value,
     expiration_time=60,
     token_max_uses=1,
 )
@@ -56,7 +50,6 @@ DefaultDelegationTokenServerConfig = DelegationServerConfig(
 __all__ = [
     "NilAuthPrivateKey",
     "NilAuthPublicKey",
-    "NilAuthInstance",
     "PromptDocumentInfo",
     "AuthType",
     "DelegationTokenRequest",
