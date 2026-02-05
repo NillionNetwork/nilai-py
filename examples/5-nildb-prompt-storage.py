@@ -14,7 +14,7 @@ def main():
     # The Client class automatically handles the NUC token creation and management.
     ## For sandbox, use the following:
     client = Client(
-        base_url="https://nilai-f910.nillion.network/nuc/v1/", api_key=API_KEY
+        base_url="https://api.nilai.nillion.network/nuc/v1/", api_key=API_KEY
     )
 
     # Make a request to the Nilai API

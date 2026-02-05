@@ -89,7 +89,7 @@ class StoredPromptClient:
 
     def __init__(
         self,
-        base_url: str = "https://nilai-f910.nillion.network/nuc/v1/",
+        base_url: str = "https://api.nilai.nillion.network/nuc/v1/",
     ):
         self.client = Client(
             base_url=base_url,

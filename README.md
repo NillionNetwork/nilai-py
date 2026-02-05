@@ -89,7 +89,7 @@ server = DelegationTokenServer(
 
 # Client-side: Initialize client for delegation token mode
 client = Client(
-    base_url="https://nilai-a779.nillion.network/nuc/v1/",
+    base_url="https://api.nilai.nillion.network/nuc/v1/",
     auth_type=AuthType.DELEGATION_TOKEN,
 )
 

@@ -11,10 +11,8 @@ def main():
     # The Client class automatically handles the NUC token creation and management.
     ## For sandbox, use the following:
     client = Client(
-        base_url="https://nilai-a779.nillion.network/v1/",
+        base_url="https://api.nilai.nillion.network/nuc/v1",
         api_key=API_KEY,
-        # For production, use the following:
-        # nilauth_instance=NilAuthInstance.PRODUCTION,
     )
 
     # Make a streaming request to the Nilai API
@@ -22,7 +20,7 @@ def main():
     print("=" * 50)
 
     stream = client.chat.completions.create(
-        model="google/gemma-3-27b-it",
+        model="openai/gpt-oss-20b",
         messages=[
             {
                 "role": "user",

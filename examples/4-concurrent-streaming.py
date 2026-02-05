@@ -179,16 +179,10 @@ class ConcurrentStreamingStats:
 def stream_worker(stream_id, stats, prompts):
     """Worker function to handle a single streaming request"""
     try:
-        http_client = DefaultHttpxClient(verify=False)
         # Create a separate client for this thread
         client = Client(
-            # base_url="https://nilai-a779.nillion.network/v1/",
             api_key=API_KEY,
-            http_client=http_client,
-            # For production, use the following:
-            # base_url="https://nilai-f910.nillion.network/nuc/v1/",
-            # nilauth_instance=NilAuthInstance.PRODUCTION,
-            base_url="https://localhost/nuc/v1",
+            base_url="https://api.nilai.nillion.network/nuc/v1",
         )
 
         # Start this stream

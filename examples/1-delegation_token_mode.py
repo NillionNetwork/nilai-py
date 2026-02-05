@@ -21,15 +21,13 @@ def main():
             expiration_time=10,  # 10 seconds validity of delegation tokens
             token_max_uses=1,  # 1 use of a delegation token
         ),
-        # For production instances, use the following:
-        # nilauth_instance=NilAuthInstance.PRODUCTION,
     )
 
     # >>> Client initializes a client
     # The client is responsible for making requests to the Nilai API.
     # We do not provide an API key but we set the auth type to DELEGATION_TOKEN
     client = Client(
-        base_url="https://nilai.nillion.network/nuc/v1",
+        base_url="https://api.nilai.nillion.network/nuc/v1",
         auth_type=AuthType.DELEGATION_TOKEN,
     )
     for i in range(100):

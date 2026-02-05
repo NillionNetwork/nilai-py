@@ -26,6 +26,7 @@ def new_root_token(private_key: PrivateKey) -> NucTokenEnvelope:
     Force the creation of a new root token.
     """
     hex_public_key = private_key.pubkey
+    print(f"Hex public key: {hex_public_key.serialize().hex()}")
     if hex_public_key is None:
         raise ValueError("Public key is None")
     hex_public_key = hex_public_key.serialize()
