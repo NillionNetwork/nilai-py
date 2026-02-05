@@ -57,13 +57,17 @@ class NilDBPromptManager(object):
         if not result.success:
             raise RuntimeError(f"User setup failed: {result.error}")
         else:
-            print(
-                f"🎉 User setup successful! 🎉\n  🔑 Keys saved to: {result.keys_saved_to}\n  🔐 Public Key: {result.keypair.public_key_hex(compressed=True)}\n  🆔 DID: {result.keypair.to_did_string()}"
-            )
+            if result.keypair is not None:
+                print(
+                    f"🎉 User setup successful! 🎉\n  🔑 Keys saved to: {result.keys_saved_to}\n  🔐 Public Key: {result.keypair.public_key_hex(compressed=True)}\n  🆔 DID: {result.keypair.to_did_string()}"
+                )
         return result
 
     async def request_nildb_delegation_token(self, token=None) -> PromptDelegationToken:
         # Use provided token, or fall back to env variable, or use default
+
+        if self.user_result.keypair is None:
+            raise RuntimeError("User keypair is not initialized")
 
         prompt_delegation_token = httpx.get(
             f"{self.nilai_url}delegation",
@@ -144,7 +148,7 @@ class NilDBPromptManager(object):
             return result.data if result.success and result.data else []
         except Exception as e:
             print(f"An error occurred while creating the document: {str(e)}")
-            return
+            return []
 
     async def close(self):
         """Close the underlying client connection"""

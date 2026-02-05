@@ -47,7 +47,7 @@ DefaultNilDBConfig = NilDBConfig(
         "NILDB_NODES",
         "https://nildb-stg-n1.nillion.network,https://nildb-stg-n2.nillion.network,https://nildb-stg-n3.nillion.network",
     ).split(","),
-    collection=os.getenv("NILDB_COLLECTION", NilDBCollection.SANDBOX.value),
+    collection=Uuid(os.getenv("NILDB_COLLECTION", NilDBCollection.SANDBOX.value)),
 )
 
 print(

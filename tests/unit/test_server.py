@@ -26,7 +26,6 @@ from nilai_py.niltypes import (
     DelegationTokenResponse,
     DelegationServerConfig,
     DefaultDelegationTokenServerConfig,
-    NilAuthInstance,
     RequestType,
 )
 from nilai_py.common import is_expired
@@ -52,7 +51,6 @@ class TestDelegationTokenServer:
     def custom_config(self):
         """Custom configuration for testing."""
         return DelegationServerConfig(
-            nilauth_url="https://custom.nilauth.url",
             expiration_time=120,
             token_max_uses=5,
         )
@@ -93,19 +91,15 @@ class TestDelegationTokenServer:
         server = DelegationTokenServer(private_key_hex)
 
         assert server.config == DefaultDelegationTokenServerConfig
-        assert server.nilauth_instance == NilAuthInstance.SANDBOX
         assert hasattr(server, "private_key")
 
     def test_init_with_custom_config(self, private_key_hex, custom_config):
         """Test server initialization with custom configuration."""
         server = DelegationTokenServer(
             private_key_hex,
-            config=custom_config,
-            nilauth_instance=NilAuthInstance.PRODUCTION,
         )
 
         assert server.config == custom_config
-        assert server.nilauth_instance == NilAuthInstance.PRODUCTION
 
     def test_init_invalid_private_key(self):
         """Test server initialization with invalid private key."""
@@ -157,7 +151,6 @@ class TestDelegationTokenServer:
         result = server.root_token
 
         assert result == mock_token_envelope
-        mock_nilauth_client_class.assert_called_once_with(NilAuthInstance.SANDBOX.value)
         mock_client.request_token.assert_called_once_with(
             server.private_key, blind_module=BlindModule.NILAI
         )
@@ -319,17 +312,8 @@ class TestDelegationTokenServer:
         """Test that configuration properties are properly accessible."""
         server = DelegationTokenServer(private_key_hex, config=custom_config)
 
-        assert server.config.nilauth_url == "https://custom.nilauth.url"
         assert server.config.expiration_time == 120
         assert server.config.token_max_uses == 5
-
-    def test_nilauth_instance_property(self, private_key_hex):
-        """Test nilauth_instance property is properly set."""
-        server = DelegationTokenServer(
-            private_key_hex, nilauth_instance=NilAuthInstance.PRODUCTION
-        )
-
-        assert server.nilauth_instance == NilAuthInstance.PRODUCTION
 
     @patch("nilai_py.server.datetime")
     def test_expiration_time_calculation(

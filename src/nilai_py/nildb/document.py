@@ -8,6 +8,7 @@ from secretvaults.dto.users import (
     DeleteDocumentRequestParams,
 )
 from secretvaults.dto.data import CreateOwnedDataRequest
+from secretvaults.common.types import Uuid, Did
 
 from nilai_py.nildb.models import OperationResult
 
@@ -41,7 +42,9 @@ async def read_document_core(
     """Read a specific document - core functionality"""
     try:
         read_params = ReadDataRequestParams(
-            collection=collection_id, document=document_id, subject=relevant_user
+            collection=Uuid(collection_id),
+            document=Uuid(document_id),
+            subject=Uuid(relevant_user) if relevant_user else None,
         )
         document_response = await user_client.read_data(read_params)
         if not document_response:
@@ -68,7 +71,7 @@ async def delete_document_core(
     """Delete a specific document - core functionality"""
     try:
         delete_params = DeleteDocumentRequestParams(
-            collection=collection_id, document=document_id
+            collection=Uuid(collection_id), document=Uuid(document_id)
         )
         delete_response = await user_client.delete_data(delete_params)
 
@@ -99,13 +102,15 @@ async def update_document_core(
     """Update a specific document - core functionality"""
     try:
         update_request = UpdateUserDataRequest(
-            collection=collection_id, document=document_id, update=update_data
+            collection=Uuid(collection_id),
+            document=Uuid(document_id),
+            update=update_data,
         )
         update_response = await user_client.update_data(update_request)
 
         if update_response and hasattr(update_response, "root"):
             has_errors = False
-            for _, response in update_response.root.items():
+            for _, response in update_response.root.items():  # pyright: ignore[reportAttributeAccessIssue]
                 if hasattr(response, "status") and response.status != 204:
                     has_errors = True
                     break
@@ -115,7 +120,7 @@ async def update_document_core(
                     success=False, message="Update failed on some nodes"
                 )
             else:
-                node_count = len(update_response.root)
+                node_count = len(update_response.root)  # pyright: ignore[reportAttributeAccessIssue]
                 return OperationResult(
                     success=True,
                     data=update_response,
@@ -142,10 +147,10 @@ async def create_document_core(
         # Create delegation token
 
         create_data_request = CreateOwnedDataRequest(
-            collection=collection_id,
-            owner=user_client.id,
+            collection=Uuid(collection_id),
+            owner=Did(user_client.id),
             data=[data],
-            acl=AclDto(grantee=builder_did, read=True, write=False, execute=True),
+            acl=AclDto(grantee=Did(builder_did), read=True, write=False, execute=True),
         )
 
         create_response = await user_client.create_data(
@@ -157,7 +162,7 @@ async def create_document_core(
         total_errors = 0
 
         if hasattr(create_response, "root"):
-            for _, response in create_response.root.items():
+            for _, response in create_response.root.items():  # pyright: ignore[reportAttributeAccessIssue]
                 if hasattr(response, "data"):
                     created_count = (
                         len(response.data.created) if response.data.created else 0
@@ -174,7 +179,7 @@ async def create_document_core(
                     message=f"Created {total_created} documents but had {total_errors} errors",
                 )
             else:
-                node_count = len(create_response.root)
+                node_count = len(create_response.root)  # pyright: ignore[reportAttributeAccessIssue]
                 return OperationResult(
                     success=True,
                     data=create_response,

@@ -2,7 +2,7 @@ import json
 import os
 import openai
 from typing_extensions import override
-from typing import List
+from typing import List, Optional
 
 
 import base64
@@ -14,26 +14,22 @@ import datetime
 from nuc.envelope import NucTokenEnvelope
 from nuc.token import Did, InvocationBody
 from nuc.builder import NucTokenBuilder
-from nuc.nilauth import NilauthClient, BlindModule
 from nilai_py.nildb import NilDBPromptManager
 
 from nilai_py.niltypes import (
     DelegationTokenRequest,
+    DelegationTokenResponse,
     NilAuthPrivateKey,
     NilAuthPublicKey,
-    NilAuthInstance,
     AuthType,
 )
 
-from nilai_py.common import is_expired
+from nilai_py.common import is_expired, new_root_token
 
 
 class Client(openai.Client):
     def __init__(self, *args, **kwargs):
         self.auth_type: AuthType = kwargs.pop("auth_type", AuthType.API_KEY)
-        self.nilauth_instance: NilAuthInstance = kwargs.pop(
-            "nilauth_instance", NilAuthInstance.SANDBOX
-        )
 
         match self.auth_type:
             case AuthType.API_KEY:
@@ -59,23 +55,23 @@ class Client(openai.Client):
 
     def _api_key_init(self, *args, **kwargs):
         # Initialize the nilauth private key with the subscription
-        self.api_key: str = kwargs.get("api_key", None)
+        self.api_key: str | None = kwargs.get("api_key", None)  # pyright: ignore[reportIncompatibleVariableOverride]
         if self.api_key is None:
             raise ValueError("In API key mode, api_key is required")
 
-        self.nilauth_private_key: NilAuthPrivateKey = NilAuthPrivateKey(
+        self.nilauth_private_key: NilAuthPrivateKey = NilAuthPrivateKey(  # pyright: ignore[reportRedeclaration]
             bytes.fromhex(self.api_key)
         )
-        # Retrieve the nilauth url from the kwargs
-        self.nilauth_url: NilAuthInstance = kwargs.pop(
-            "nilauth_url", NilAuthInstance.SANDBOX
-        )
         # Initialize the root token envelope
-        self._root_token_envelope: NucTokenEnvelope = None
+        self._root_token_envelope: Optional[NucTokenEnvelope] = None
 
     def _delegation_token_init(self, *args, **kwargs):
         # Generate a new private key for the client
-        self.nilauth_private_key: NilAuthPrivateKey = NilAuthPrivateKey()
+        api_key = kwargs.get("api_key", None)
+        if api_key is not None:
+            self.nilauth_private_key = NilAuthPrivateKey(bytes.fromhex(api_key))
+        else:
+            self.nilauth_private_key: NilAuthPrivateKey = NilAuthPrivateKey()
 
     @property
     def root_token(self) -> NucTokenEnvelope:
@@ -90,11 +86,7 @@ class Client(openai.Client):
             raise RuntimeError("Root token is only available in API key mode")
 
         if self._root_token_envelope is None or is_expired(self._root_token_envelope):
-            nilauth_client = NilauthClient(self.nilauth_instance.value)
-            root_token_response = nilauth_client.request_token(
-                self.nilauth_private_key, blind_module=BlindModule.NILAI
-            )
-            self._root_token_envelope = NucTokenEnvelope.parse(root_token_response)
+            self._root_token_envelope = new_root_token(self.nilauth_private_key)
 
         return self._root_token_envelope
 
@@ -127,12 +119,15 @@ class Client(openai.Client):
         Returns:
             DelegationTokenRequest: The delegation request.
         """
+        if self.nilauth_private_key.pubkey is None:
+            raise ValueError("Public key is None")
+
         delegation_request: DelegationTokenRequest = DelegationTokenRequest(
             public_key=self.nilauth_private_key.pubkey.serialize().hex()
         )
         return delegation_request
 
-    def update_delegation(self, delegation_token_response: str):
+    def update_delegation(self, delegation_token_response: DelegationTokenResponse):
         """
         Update the delegation token for the client.
         """
@@ -196,7 +191,7 @@ class Client(openai.Client):
         return {"Authorization": f"Bearer {api_key}"}
 
     async def async_list_prompts_from_nildb(self) -> None:
-        prompt_manager = await NilDBPromptManager.init(nilai_url=self.base_url)
+        prompt_manager = await NilDBPromptManager.init(nilai_url=str(self.base_url))
         await prompt_manager.list_prompts()
         await prompt_manager.close()
 
@@ -204,7 +199,7 @@ class Client(openai.Client):
         return asyncio.run(self.async_list_prompts_from_nildb())
 
     async def async_store_prompt_to_nildb(self, prompt: str, dir: str) -> List[str]:
-        prompt_manager = await NilDBPromptManager.init(nilai_url=self.base_url)
+        prompt_manager = await NilDBPromptManager.init(nilai_url=str(self.base_url))
 
         invocation_token = self._get_invocation_token()
         result = await prompt_manager.create_prompt(
@@ -216,16 +211,21 @@ class Client(openai.Client):
         # Extract document IDs from the result for storage
         document_ids = []
         if result and hasattr(result, "root"):
-            for node_name, response in result.root.items():
+            for node_name, response in result.root.items():  # pyright: ignore[reportAttributeAccessIssue]
                 if hasattr(response, "data") and hasattr(response.data, "created"):
                     document_ids.extend(response.data.created)
 
         # Store the created document IDs to a json file
+        did = prompt_manager.user_result.keypair
+        if did is None:
+            raise ValueError("DID is None")
+        did = did.to_did_string()
+
         os.makedirs(dir, exist_ok=True)
         storage_data = {
             "prompt": prompt,
             "created_at": datetime.datetime.now().isoformat(),
-            "did": prompt_manager.user_result.keypair.to_did_string(),
+            "did": did,
             "document_ids": document_ids,
         }
         with open(f"{dir}/stored_prompts-{document_ids[0]}.json", "w+") as f:

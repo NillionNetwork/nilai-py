@@ -10,25 +10,31 @@ def main():
     # The API key will be displayed in the subscription details.
     # The Client class automatically handles the NUC token creation and management.
     ## For sandbox, use the following:
+
+    # Create the OpenAI client with the custom endpoint and API key
     client = Client(
-        base_url="https://nilai-a779.nillion.network/v1/",
+        base_url="https://api.nilai.nillion.network/nuc/v1",
         api_key=API_KEY,
-        # For production, use the following:
-        # nilauth_instance=NilAuthInstance.PRODUCTION,
     )
 
     # Make a request to the Nilai API
     response = client.chat.completions.create(
-        model="google/gemma-3-27b-it",
+        model="openai/gpt-oss-20b",
         messages=[
             {
                 "role": "user",
                 "content": "Create a story written as if you were a pirate. Write in a pirate accent.",
             }
         ],
+        stream=True,
     )
 
-    print(f"Response: {response.choices[0].message.content}")
+    for chunk in response:
+        if chunk.choices[0].finish_reason is not None:
+            print("\n[DONE]")
+            break
+        if chunk.choices[0].delta.content is not None:
+            print(chunk.choices[0].delta.content, end="", flush=True)
 
 
 if __name__ == "__main__":

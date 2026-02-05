@@ -4,19 +4,18 @@ from nilai_py import (
     Client,
     DelegationTokenServer,
     AuthType,
-    NilAuthInstance,
     DelegationServerConfig,
     DelegationTokenRequest,
     DelegationTokenResponse,
 )
 
-from . import API_KEY
+from . import get_api_key
 
 
 def test_e2e_api_key():
     client = Client(
         base_url="https://nilai-a779.nillion.network/nuc/v1/",
-        api_key=API_KEY,
+        api_key=get_api_key(),
     )
     response = client.chat.completions.create(
         model="meta-llama/Llama-3.2-3B-Instruct",
@@ -30,9 +29,8 @@ def test_e2e_api_key():
 
 def test_e2e_delegation_token():
     server = DelegationTokenServer(
-        private_key=API_KEY,
+        private_key=get_api_key(),
         config=DelegationServerConfig(
-            nilauth_url=NilAuthInstance.SANDBOX.value,
             expiration_time=10,  # 1 second
             token_max_uses=1,  # 1 use
         ),
@@ -64,9 +62,8 @@ def test_e2e_delegation_token():
 
 def test_e2e_delegation_token_expired():
     server = DelegationTokenServer(
-        private_key=API_KEY,
+        private_key=get_api_key(),
         config=DelegationServerConfig(
-            nilauth_url=NilAuthInstance.SANDBOX.value,
             expiration_time=0,  # 0 seconds validity -> token is expired
             token_max_uses=1,  # 1 use
         ),
@@ -100,9 +97,8 @@ def test_e2e_delegation_token_expired():
 
 def test_e2e_delegation_token_max_uses():
     server = DelegationTokenServer(
-        private_key=API_KEY,
+        private_key=get_api_key(),
         config=DelegationServerConfig(
-            nilauth_url=NilAuthInstance.SANDBOX.value,
             expiration_time=10,  # 10 seconds validity -> token is not expired
             token_max_uses=1,  # 1 use -> token can be used once
         ),

@@ -14,7 +14,7 @@ def main():
     # >>> Server initializes a delegation token server
     # The server is responsible for creating delegation tokens
     # and managing their expiration and usage.
-    print("API_KEY", API_KEY)
+
     server = DelegationTokenServer(
         private_key=API_KEY,
         config=DelegationServerConfig(
@@ -29,10 +29,8 @@ def main():
     # The client is responsible for making requests to the Nilai API.
     # We do not provide an API key but we set the auth type to DELEGATION_TOKEN
     client = Client(
-        base_url="https://nilai-a779.nillion.network/v1/",
+        base_url="https://nilai.nillion.network/nuc/v1",
         auth_type=AuthType.DELEGATION_TOKEN,
-        # For production instances, use the following:
-        # nilauth_instance=NilAuthInstance.PRODUCTION,
     )
     for i in range(100):
         # >>> Client produces a delegation request
@@ -48,7 +46,7 @@ def main():
 
         # >>> Client uses the delegation token to make a request
         response = client.chat.completions.create(
-            model="meta-llama/Llama-3.2-3B-Instruct",
+            model="openai/gpt-oss-20b",
             messages=[
                 {"role": "user", "content": "Hello! Can you help me with something?"}
             ],

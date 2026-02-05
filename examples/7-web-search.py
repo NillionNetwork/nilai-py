@@ -1,4 +1,4 @@
-from nilai_py import Client, NilAuthInstance
+from nilai_py import Client
 
 from config import API_KEY
 
@@ -13,8 +13,6 @@ def main():
     client = Client(
         base_url="https://nilai-f910.nillion.network/nuc/v1/",
         api_key=API_KEY,
-        # For production, use the following:
-        nilauth_instance=NilAuthInstance.PRODUCTION,
     )
 
     # Make a request to the Nilai API

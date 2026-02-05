@@ -1,4 +1,4 @@
-from nilai_py import Client, NilAuthInstance
+from nilai_py import Client
 import time
 import threading
 import sys
@@ -11,7 +11,7 @@ class VimStatusBar:
     """A true vim-like status bar that stays fixed at the bottom"""
 
     def __init__(self):
-        self.stats = None
+        self.stats: StreamingStats | None = None
         self.is_running = False
         self.thread = None
         self.terminal_height = self._get_terminal_height()
@@ -82,6 +82,9 @@ class VimStatusBar:
 
     def _format_status(self):
         """Format the status string"""
+        if self.stats is None:
+            return ""
+
         elapsed = self.stats.get_elapsed_time()
         tokens_per_sec = self.stats.get_tokens_per_second()
         chars_per_sec = self.stats.get_chars_per_second()
@@ -162,7 +165,6 @@ def main():
         api_key=API_KEY,
         # For production, use the following:
         base_url="https://nilai-f910.nillion.network/nuc/v1/",
-        nilauth_instance=NilAuthInstance.PRODUCTION,
     )
 
     # Initialize statistics tracking and status bar

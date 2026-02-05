@@ -114,6 +114,12 @@ async def setup_user_core(
             ),
         )
 
+        if private_file is None or public_file is None:
+            return UserSetupResult(
+                success=False,
+                error=f"Failed to save keypair: {private_file} or {public_file}",
+            )
+
         return UserSetupResult(
             success=True,
             user_client=user_client,
@@ -126,7 +132,7 @@ async def setup_user_core(
 
 
 def store_keypair(
-    keypair: Keypair, keys_dir: str = "keys", name_prefix: str = None
+    keypair: Keypair, keys_dir: str = "keys", name_prefix: Optional[str] = None
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     """Store keypair to files with optional custom prefix"""
     if name_prefix:
@@ -300,8 +306,7 @@ async def create_user_if_not_exists(
             success, keypair, error = load_keypair_from_json(
                 latest_keypair_info.private_key_file
             )
-
-            if not success:
+            if not success or keypair is None:
                 return UserSetupResult(
                     success=False, error=f"Failed to load existing keypair: {error}"
                 )
@@ -314,6 +319,14 @@ async def create_user_if_not_exists(
                     operation=BlindfoldOperation.STORE, use_cluster_key=True
                 ),
             )
+
+            if (
+                not latest_keypair_info.private_key_file
+                or not latest_keypair_info.public_key_file
+            ):
+                return UserSetupResult(
+                    success=False, error=f"Failed to load existing keypair: {error}"
+                )
 
             return UserSetupResult(
                 success=True,

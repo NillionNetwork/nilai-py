@@ -20,7 +20,6 @@ from nilai_py import (
     DelegationTokenServer,
     AuthType,
     DelegationServerConfig,
-    NilAuthInstance,
     PromptDocumentInfo,
     DelegationTokenServerType,
 )
@@ -55,10 +54,8 @@ class DelegationServerManager:
     def __init__(
         self,
         api_key: str,
-        nilauth_instance: NilAuthInstance = NilAuthInstance.PRODUCTION,
     ):
         self.api_key = api_key
-        self.nilauth_instance = nilauth_instance
 
     def create_subscription_owner_server(self) -> DelegationTokenServer:
         """Create server for the subscription owner (manages API access)."""
@@ -68,7 +65,6 @@ class DelegationServerManager:
                 expiration_time=10 * 60 * 60,  # 10 hours
                 token_max_uses=10,
             ),
-            nilauth_instance=self.nilauth_instance,
         )
 
     def create_prompt_data_owner_server(
@@ -85,7 +81,6 @@ class DelegationServerManager:
                     doc_id=prompt_data["doc_id"], owner_did=prompt_data["did"]
                 ),
             ),
-            nilauth_instance=self.nilauth_instance,
         )
 
 
@@ -95,12 +90,10 @@ class StoredPromptClient:
     def __init__(
         self,
         base_url: str = "https://nilai-f910.nillion.network/nuc/v1/",
-        nilauth_instance: NilAuthInstance = NilAuthInstance.PRODUCTION,
     ):
         self.client = Client(
             base_url=base_url,
             auth_type=AuthType.DELEGATION_TOKEN,
-            nilauth_instance=nilauth_instance,
         )
 
     def setup_delegation(self, delegation_server: DelegationTokenServer) -> None:

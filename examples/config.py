@@ -3,4 +3,12 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-API_KEY = os.getenv("API_KEY")
+
+def get_api_key() -> str:
+    api_key: str | None = os.getenv("API_KEY", None)
+    if api_key is None:
+        raise ValueError("API_KEY is not set")
+    return api_key
+
+
+API_KEY: str = get_api_key()
