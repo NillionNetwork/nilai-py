@@ -5,11 +5,10 @@ from config import API_KEY
 
 def main():
     # Initialize the client in API key mode
-    # To obtain an API key, navigate to https://nilpay.vercel.app/
-    # and create a new subscription.
-    # The API key will be displayed in the subscription details.
+    # To obtain an API key, navigate to https://nilai.nillion.com/
+    # and create a public DID / private API key.
+
     # The Client class automatically handles the NUC token creation and management.
-    ## For sandbox, use the following:
     client = Client(
         base_url="https://api.nilai.nillion.network/nuc/v1",
         api_key=API_KEY,
