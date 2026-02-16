@@ -31,7 +31,6 @@ from nilai_py.niltypes import (
 from nilai_py.common import is_expired
 from nuc.envelope import NucTokenEnvelope
 from nuc.token import NucToken
-from nuc.nilauth import BlindModule
 
 
 class TestDelegationTokenServer:
@@ -97,6 +96,7 @@ class TestDelegationTokenServer:
         """Test server initialization with custom configuration."""
         server = DelegationTokenServer(
             private_key_hex,
+            config=custom_config,
         )
 
         assert server.config == custom_config
@@ -129,21 +129,15 @@ class TestDelegationTokenServer:
 
         assert is_expired(envelope) is False
 
-    @patch("nilai_py.server.NilauthClient")
-    @patch("nilai_py.server.NucTokenEnvelope")
+    @patch("nilai_py.server.new_root_token")
     def test_root_token_first_access(
         self,
-        mock_envelope_class,
-        mock_nilauth_client_class,
+        mock_new_root_token,
         private_key_hex,
         mock_token_envelope,
     ):
         """Test root_token property on first access."""
-        # Setup mocks
-        mock_client = Mock()
-        mock_nilauth_client_class.return_value = mock_client
-        mock_client.request_token.return_value = "mock_token_response"
-        mock_envelope_class.parse.return_value = mock_token_envelope
+        mock_new_root_token.return_value = mock_token_envelope
 
         server = DelegationTokenServer(private_key_hex)
 
@@ -151,26 +145,17 @@ class TestDelegationTokenServer:
         result = server.root_token
 
         assert result == mock_token_envelope
-        mock_client.request_token.assert_called_once_with(
-            server.private_key, blind_module=BlindModule.NILAI
-        )
-        mock_envelope_class.parse.assert_called_once_with("mock_token_response")
+        mock_new_root_token.assert_called_once_with(server.private_key)
 
-    @patch("nilai_py.server.NilauthClient")
-    @patch("nilai_py.server.NucTokenEnvelope")
+    @patch("nilai_py.server.new_root_token")
     def test_root_token_cached_access(
         self,
-        mock_envelope_class,
-        mock_nilauth_client_class,
+        mock_new_root_token,
         private_key_hex,
         mock_token_envelope,
     ):
         """Test root_token property returns cached token when not expired."""
-        # Setup mocks
-        mock_client = Mock()
-        mock_nilauth_client_class.return_value = mock_client
-        mock_client.request_token.return_value = "mock_token_response"
-        mock_envelope_class.parse.return_value = mock_token_envelope
+        mock_new_root_token.return_value = mock_token_envelope
 
         server = DelegationTokenServer(private_key_hex)
 
@@ -179,25 +164,19 @@ class TestDelegationTokenServer:
         result2 = server.root_token
 
         assert result1 == result2 == mock_token_envelope
-        # Should only call the client once (cached)
-        mock_client.request_token.assert_called_once()
+        # Should only call new_root_token once (cached)
+        mock_new_root_token.assert_called_once()
 
-    @patch("nilai_py.server.NilauthClient")
-    @patch("nilai_py.server.NucTokenEnvelope")
+    @patch("nilai_py.server.new_root_token")
     def test_root_token_refresh_when_expired(
         self,
-        mock_envelope_class,
-        mock_nilauth_client_class,
+        mock_new_root_token,
         private_key_hex,
         expired_token_envelope,
         mock_token_envelope,
     ):
         """Test root_token property refreshes when token is expired."""
-        # Setup mocks
-        mock_client = Mock()
-        mock_nilauth_client_class.return_value = mock_client
-        mock_client.request_token.return_value = "mock_token_response"
-        mock_envelope_class.parse.side_effect = [
+        mock_new_root_token.side_effect = [
             expired_token_envelope,
             mock_token_envelope,
         ]
@@ -210,8 +189,8 @@ class TestDelegationTokenServer:
 
         assert result1 == expired_token_envelope
         assert result2 == mock_token_envelope
-        # Should call the client twice (once for initial, once for refresh)
-        assert mock_client.request_token.call_count == 2
+        # Should call new_root_token twice (once for initial, once for refresh)
+        assert mock_new_root_token.call_count == 2
 
     @patch("nilai_py.server.NucTokenBuilder")
     def test_create_delegation_token_success(
@@ -293,15 +272,12 @@ class TestDelegationTokenServer:
         with pytest.raises(ValueError):
             server.create_delegation_token(invalid_request)
 
-    @patch("nilai_py.server.NilauthClient")
-    def test_nilauth_client_error_handling(
-        self, mock_nilauth_client_class, private_key_hex
+    @patch("nilai_py.server.new_root_token")
+    def test_new_root_token_error_handling(
+        self, mock_new_root_token, private_key_hex
     ):
-        """Test error handling when NilauthClient fails."""
-        # Setup mock to raise an exception
-        mock_client = Mock()
-        mock_nilauth_client_class.return_value = mock_client
-        mock_client.request_token.side_effect = Exception("Network error")
+        """Test error handling when new_root_token fails."""
+        mock_new_root_token.side_effect = Exception("Network error")
 
         server = DelegationTokenServer(private_key_hex)
 
