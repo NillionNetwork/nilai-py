@@ -193,7 +193,7 @@ def stream_worker(stream_id, stats, prompts):
 
         # Make streaming request
         stream = client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model="google/gemma-4-26B-A4B-it",
             messages=[{"role": "user", "content": prompt}],
             stream=True,
         )

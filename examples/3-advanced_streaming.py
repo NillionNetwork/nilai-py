@@ -180,9 +180,7 @@ def main():
 
     # Make a streaming request to the Nilai API
     stream = client.chat.completions.create(
-        # model="google/gemma-3-27b-it",
-        # model="openai/gpt-oss-20b",
-        model="meta-llama/Llama-3.1-8B-Instruct",
+        model="google/gemma-4-26B-A4B-it",
         messages=[
             {
                 "role": "user",

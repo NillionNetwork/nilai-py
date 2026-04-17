@@ -18,7 +18,7 @@ def main():
 
     # Make a request to the Nilai API
     # response = client.chat.completions.create(
-    #     model="google/gemma-3-27b-it",
+    #     model="google/gemma-4-26B-A4B-it",
     #     messages=[
     #         {"role": "user", "content": "What is your name?"}
     #     ],
