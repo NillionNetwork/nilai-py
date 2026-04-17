@@ -147,7 +147,7 @@ def main():
 
     # Make request using stored prompt
     response = stored_prompt_client.create_completion(
-        model="openai/gpt-oss-20b",
+        model="google/gemma-4-26B-A4B-it",
         messages=[
             {"role": "user", "content": "Hello! Can you help me with something?"}
         ],

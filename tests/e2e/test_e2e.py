@@ -14,11 +14,11 @@ from . import get_api_key
 
 def test_e2e_api_key():
     client = Client(
-        base_url="https://nilai-a779.nillion.network/nuc/v1/",
+        base_url="https://api.nilai.nillion.network/nuc/v1",
         api_key=get_api_key(),
     )
     response = client.chat.completions.create(
-        model="meta-llama/Llama-3.2-3B-Instruct",
+        model="google/gemma-4-26B-A4B-it",
         messages=[
             {"role": "user", "content": "Hello! Can you help me with something?"}
         ],
@@ -37,7 +37,7 @@ def test_e2e_delegation_token():
     )
 
     client = Client(
-        base_url="https://nilai-a779.nillion.network/nuc/v1/",
+        base_url="https://api.nilai.nillion.network/nuc/v1",
         auth_type=AuthType.DELEGATION_TOKEN,
     )
 
@@ -51,7 +51,7 @@ def test_e2e_delegation_token():
     client.update_delegation(delegation_token)
     # Client uses the delegation token to make a request
     response = client.chat.completions.create(
-        model="meta-llama/Llama-3.2-3B-Instruct",
+        model="google/gemma-4-26B-A4B-it",
         messages=[
             {"role": "user", "content": "Hello! Can you help me with something?"}
         ],
@@ -70,7 +70,7 @@ def test_e2e_delegation_token_expired():
     )
 
     client = Client(
-        base_url="https://nilai-a779.nillion.network/nuc/v1/",
+        base_url="https://api.nilai.nillion.network/nuc/v1",
         auth_type=AuthType.DELEGATION_TOKEN,
     )
 
@@ -86,7 +86,7 @@ def test_e2e_delegation_token_expired():
     with pytest.raises(openai.AuthenticationError):
         # Client uses the delegation token to make a request
         response = client.chat.completions.create(
-            model="meta-llama/Llama-3.2-3B-Instruct",
+            model="google/gemma-4-26B-A4B-it",
             messages=[
                 {"role": "user", "content": "Hello! Can you help me with something?"}
             ],
@@ -105,7 +105,7 @@ def test_e2e_delegation_token_max_uses():
     )
 
     client = Client(
-        base_url="https://nilai-a779.nillion.network/nuc/v1/",
+        base_url="https://api.nilai.nillion.network/nuc/v1",
         auth_type=AuthType.DELEGATION_TOKEN,
     )
 
@@ -119,7 +119,7 @@ def test_e2e_delegation_token_max_uses():
     client.update_delegation(delegation_token)
     # Client uses the delegation token to make a request
     response = client.chat.completions.create(
-        model="meta-llama/Llama-3.2-3B-Instruct",
+        model="google/gemma-4-26B-A4B-it",
         messages=[
             {"role": "user", "content": "Hello! Can you help me with something?"}
         ],
@@ -129,7 +129,7 @@ def test_e2e_delegation_token_max_uses():
     with pytest.raises(openai.RateLimitError):
         # Client uses the delegation token to make a request
         response = client.chat.completions.create(
-            model="meta-llama/Llama-3.2-3B-Instruct",
+            model="google/gemma-4-26B-A4B-it",
             messages=[
                 {"role": "user", "content": "Hello! Can you help me with something?"}
             ],

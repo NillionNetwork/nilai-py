@@ -23,13 +23,13 @@ from nilai_py import Client
 
 # Initialize client with API key
 client = Client(
-    base_url="https://testnet-p0.nilai.sandbox.nilogy.xyz/nuc/v1/",
+    base_url="https://api.nilai.nillion.network/nuc/v1/",
     api_key="your-api-key-here"
 )
 
 # Make a chat completion request
 response = client.chat.completions.create(
-    model="meta-llama/Llama-3.2-3B-Instruct",
+    model="meta-google/gemma-4-26B-A4B-it",
     messages=[
         {"role": "user", "content": "Hello! Can you help me with something?"}
     ],
@@ -42,20 +42,20 @@ print(f"Response: {response.choices[0].message.content}")
 
 ### 1. API Key Mode (Simple)
 
-The easiest way to get started. You'll need an API key from [nilpay.vercel.app](https://nilpay.vercel.app/).
+The easiest way to get started. You'll need an API key from the Nillion [Developer Portal](https://developer.nillion.com/).
 
 ```python
 from nilai_py import Client
 
 # Set up your API key in a .env file or environment variable
 client = Client(
-    base_url="https://testnet-p0.nilai.sandbox.nilogy.xyz/nuc/v1/",
+    base_url="https://api.nilai.nillion.network/nuc/v1/",
     api_key="your-api-key-here"
 )
 
 # Make requests just like with OpenAI
 response = client.chat.completions.create(
-    model="meta-llama/Llama-3.2-3B-Instruct",
+    model="google/gemma-4-26B-A4B-it",
     messages=[
         {"role": "user", "content": "Explain quantum computing in simple terms"}
     ],
@@ -104,7 +104,7 @@ client.update_delegation(delegation_token)
 
 # Step 4: Make authenticated requests
 response = client.chat.completions.create(
-    model="meta-llama/Llama-3.2-3B-Instruct",
+    model="google/gemma-4-26B-A4B-it",
     messages=[
         {"role": "user", "content": "What are the benefits of decentralized AI?"}
     ],
@@ -133,7 +133,7 @@ from nilai_py import Client
 load_dotenv()
 
 client = Client(
-    base_url="https://testnet-p0.nilai.sandbox.nilogy.xyz/nuc/v1/",
+    base_url="https://api.nilai.nillion.network/nuc/v1/",
     api_key=os.getenv("API_KEY")
 )
 ```

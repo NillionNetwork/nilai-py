@@ -44,7 +44,7 @@ def main():
 
         # >>> Client uses the delegation token to make a request
         response = client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model="google/gemma-4-26B-A4B-it",
             messages=[
                 {"role": "user", "content": "Hello! Can you help me with something?"}
             ],
